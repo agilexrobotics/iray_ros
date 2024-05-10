@@ -48,6 +48,7 @@ struct CommonSensorStateMsgGroup {
   SdkTimePoint time_stamp;
   BmsBasicMessage bms_basic_state;
   BmsExtendedMessage bms_extend_state;
+  ChargeStateMessage charge_state;
 };
 
 template <typename ParserType>
@@ -167,7 +168,18 @@ class AgilexBase : public RobotCommonInterface {
     }
   }
 
-  void ResetRobotState() override {}
+  void ResetRobotState() override {
+    if (can_ != nullptr && can_->IsOpened()) {
+      AgxMessage msg;
+      msg.type = AgxMsgStateResetConfig;
+      //clear all error code
+      msg.body.state_reset_config_msg.error_clear_byte = 0x00;
+
+      // send to can bus
+      can_frame frame;
+      if (parser_.EncodeMessage(&msg, &frame)) can_->SendFrame(frame);
+    }
+  }
 
   ProtocolVersion GetParserProtocolVersion() override {
     return parser_.GetParserProtocolVersion();
@@ -390,6 +402,10 @@ class AgilexBase : public RobotCommonInterface {
       case AgxMsgBmsExtended: {
         common_sensor_state_msgs_.bms_extend_state = 
           status_msg.body.bms_extended_msg;
+      }
+      case AgxMsgCharge: {
+        common_sensor_state_msgs_.charge_state =
+          status_msg.body.charge_state_msg;
       }
       default:
         break;

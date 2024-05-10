@@ -32,7 +32,12 @@ struct TracerActuatorState {
   ActuatorHSStateMessage actuator_hs_state[2];
   ActuatorLSStateMessage actuator_ls_state[2];
 };
+struct TracerCommonSensorState {
+  SdkTimePoint time_stamp;
 
+  BmsBasicMessage bms_basic_state;
+  ChargeStateMessage charge_state;
+};
 struct TracerInterface {
   virtual ~TracerInterface() = default;
 
@@ -43,6 +48,7 @@ struct TracerInterface {
   // get robot state
   virtual TracerCoreState GetRobotState() = 0;
   virtual TracerActuatorState GetActuatorState() = 0;
+  virtual TracerCommonSensorState GetCommonSensorState() = 0;
 };
 }  // namespace westonrobot
 

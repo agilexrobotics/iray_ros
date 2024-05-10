@@ -49,6 +49,7 @@ extern "C" {
 #define CAN_MSG_MOTION_STATE_ID ((uint32_t)0x221)
 #define CAN_MSG_LIGHT_STATE_ID ((uint32_t)0x231)
 #define CAN_MSG_RC_STATE_ID ((uint32_t)0x241)
+#define CAN_MSG_CHARGE_ID ((uint32_t)0x240)
 
 #define CAN_MSG_ACTUATOR1_HS_STATE_ID ((uint32_t)0x251)
 #define CAN_MSG_ACTUATOR2_HS_STATE_ID ((uint32_t)0x252)
@@ -233,6 +234,17 @@ typedef struct {
   uint8_t reserved0;
   uint8_t count;
 } RcStateFrame;
+
+typedef struct {
+  uint8_t charge_flag;
+  uint8_t reserved0;
+  uint8_t reserved1;
+  uint8_t reserved2;
+  uint8_t reserved3;
+  uint8_t reserved4;
+  uint8_t reserved5;
+  uint8_t reserved6;
+} ChargeFrame;
 
 typedef struct {
   struct16_t rpm;

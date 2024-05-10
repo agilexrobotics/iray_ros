@@ -12,7 +12,6 @@
 #include <tf/transform_broadcaster.h>
 
 #include "tracer_msgs/TracerStatus.h"
-#include "tracer_msgs/UartTracerStatus.h"
 namespace westonrobot
 {
 TracerROSMessenger::TracerROSMessenger(ros::NodeHandle *nh) : tracer_(nullptr), nh_(nh)
@@ -31,11 +30,13 @@ void TracerROSMessenger::SetupSubscription()
     // odometry publisher
     odom_publisher_ = nh_->advertise<nav_msgs::Odometry>(odom_topic_name_, 50);
     status_publisher_ = nh_->advertise<tracer_msgs::TracerStatus>("/tracer_status", 10);
-    status_uart_publisher_ = nh_->advertise<tracer_msgs::UartTracerStatus>("/uart_tracer_status", 10);
+    battery_state_pub_ = nh_->advertise<tracer_msgs::BatteryState>("/battery_state", 10);
 
     // cmd subscriber
     motion_cmd_subscriber_ = nh_->subscribe<geometry_msgs::Twist>("/cmd_vel", 5, &TracerROSMessenger::TwistCmdCallback, this); //不启用平滑包则订阅“cmd_vel”
     light_cmd_subscriber_ = nh_->subscribe<tracer_msgs::TracerLightCmd>("/tracer_light_control", 5, &TracerROSMessenger::LightCmdCallback, this);
+    clear_err_subscriber_ = nh_->subscribe<tracer_msgs::ClearErr>("/clear_err", 5,&TracerROSMessenger::ClearCallback, this);
+    reset_odom_subscriber_ = nh_->subscribe<tracer_msgs::ResetOdom>("/reset_odom", 5,&TracerROSMessenger::ResetOdomCallback, this);
 }
 
 void TracerROSMessenger::TwistCmdCallback(const geometry_msgs::Twist::ConstPtr &msg)
@@ -52,6 +53,19 @@ void TracerROSMessenger::TwistCmdCallback(const geometry_msgs::Twist::ConstPtr &
     // ROS_INFO("cmd received:%f, %f", msg->linear.x, msg->angular.z);
 }
 
+void TracerROSMessenger::ClearCallback(const tracer_msgs::ClearErr::ConstPtr &msg)
+{
+    // clear state
+    tracer_->ResetRobotState();
+}
+
+void TracerROSMessenger::ResetOdomCallback(const tracer_msgs::ResetOdom::ConstPtr &msg)
+{
+    // reset odom
+    position_x_ = 0.0;
+    position_y_ = 0.0;
+    theta_ = 0.0;
+}
 void TracerROSMessenger::GetCurrentMotionCmdForSim(double &linear, double &angular)
 {
     std::lock_guard<std::mutex> guard(twist_mutex_);
@@ -172,62 +186,44 @@ void TracerROSMessenger::PublishStateToROS()
     status_msg.front_light_state.custom_value = robot_state.light_state.front_light.custom_value;
     status_publisher_.publish(status_msg);
 
+    // publish BMS state
+    {
+        auto common_sensor_state = tracer_->GetCommonSensorState();
+
+        tracer_msgs::BatteryState batt_msg;
+        batt_msg.header.stamp = current_time_;
+        batt_msg.voltage = common_sensor_state.bms_basic_state.voltage;
+        batt_msg.temperature = common_sensor_state.bms_basic_state.temperature;
+        batt_msg.current = common_sensor_state.bms_basic_state.current;
+        // if(batt_msgs.current>0)
+        //     batt_msg.is_charge=true
+        // else
+        //     batt_msg.is_charge=false
+        if(common_sensor_state.charge_state.charge_flag == 1)
+            batt_msg.is_charge=true;
+        else if(common_sensor_state.charge_state.charge_flag == 0)
+            batt_msg.is_charge=false;
+        batt_msg.percentage = common_sensor_state.bms_basic_state.battery_soc;
+        // batt_msg.charge = std::numeric_limits<float>::quiet_NaN();
+        // batt_msg.capacity = std::numeric_limits<float>::quiet_NaN();
+        // batt_msg.design_capacity = std::numeric_limits<float>::quiet_NaN();
+        // batt_msg.power_supply_status =
+        //     tracer_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
+        // batt_msg.power_supply_health =
+        //     tracer_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
+        // batt_msg.power_supply_technology =
+        //     tracer_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LION;
+        // batt_msg.present = std::numeric_limits<uint8_t>::quiet_NaN();
+
+        battery_state_pub_.publish(batt_msg);
+    }
+
     // publish odometry and tf
     PublishOdometryToROS(status_msg.linear_velocity, status_msg.angular_velocity, dt);
 
     // record time for next integration
     last_time_ = current_time_;
 }
-//void TracerROSMessenger::PublishUartStateToROS()
-//{
-//    int i;
-//    current_time_ = ros::Time::now();
-//    double dt = (current_time_ - last_time_).toSec();
-
-//    static bool init_run = true;
-//    if (init_run)
-//    {
-//        last_time_ = current_time_;
-//        init_run = false;
-//        return;
-//    }
-
-//    auto state = tracer_->GetUartTracerState();
-
-//    // publish scout state message
-//    tracer_msgs::UartTracerStatus status_msg;
-
-//    status_msg.header.stamp = current_time_;
-
-//    status_msg.linear_velocity = state.linear_velocity;
-//    status_msg.angular_velocity = state.angular_velocity;
-
-//    status_msg.base_state = state.base_state;
-//    status_msg.control_mode = state.control_mode;
-//    status_msg.fault_code = state.fault_code;
-//    status_msg.battery_voltage = state.battery_voltage;
-
-//    for (int i = 0; i < 2; ++i)
-//    {
-//        status_msg.motor_states[i].current = state.motor_states[i].current;
-//        status_msg.motor_states[i].rpm = state.motor_states[i].rpm;
-//        status_msg.motor_states[i].temperature = state.motor_states[i].temperature;
-//    }
-
-//    status_msg.light_control_enabled = state.light_control_enabled;
-//    status_msg.front_light_state.mode = state.front_light_state.mode;
-//    status_msg.front_light_state.custom_value = state.front_light_state.custom_value;
-//    status_msg.rear_light_state.mode = state.rear_light_state.mode;
-//    status_msg.rear_light_state.custom_value = state.front_light_state.custom_value;
-
-//    status_uart_publisher_.publish(status_msg);
-
-//    // publish odometry and tf
-//    PublishOdometryToROS(state.linear_velocity, state.angular_velocity, dt);
-
-//    // record time for next integration
-//    last_time_ = current_time_;
-//}
 
 void TracerROSMessenger::PublishSimStateToROS(double linear, double angular)
 {

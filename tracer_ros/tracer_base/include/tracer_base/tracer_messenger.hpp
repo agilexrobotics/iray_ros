@@ -17,6 +17,10 @@
 #include <tf2_ros/transform_broadcaster.h>
 
 #include "tracer_msgs/TracerLightCmd.h"
+#include "tracer_msgs/ClearErr.h"
+#include "tracer_msgs/ResetOdom.h"
+#include "tracer_msgs/BatteryState.h"
+
 #include "ugv_sdk/mobile_robot/tracer_robot.hpp"
 namespace westonrobot
 {
@@ -55,6 +59,9 @@ private:
     ros::Publisher odom_publisher_;
     ros::Publisher status_publisher_;
     ros::Publisher status_uart_publisher_;
+    ros::Publisher battery_state_pub_;
+    ros::Subscriber clear_err_subscriber_;
+    ros::Subscriber reset_odom_subscriber_;
     ros::Subscriber motion_cmd_subscriber_;
     ros::Subscriber light_cmd_subscriber_;
     tf2_ros::TransformBroadcaster tf_broadcaster_;
@@ -65,12 +72,14 @@ private:
     double position_x_ = 0.0;
     double position_y_ = 0.0;
     double theta_ = 0.0;
-
+    
     ros::Time last_time_;
     ros::Time current_time_;
 
     void TwistCmdCallback(const geometry_msgs::Twist::ConstPtr &msg);
     void LightCmdCallback(const tracer_msgs::TracerLightCmd::ConstPtr &msg);
+    void ClearCallback(const tracer_msgs::ClearErr::ConstPtr &msg);
+    void ResetOdomCallback(const tracer_msgs::ResetOdom::ConstPtr &msg);
     void PublishOdometryToROS(double linear, double angular, double dt);
 };
 } // namespace wescore

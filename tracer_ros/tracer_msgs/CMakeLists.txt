@@ -48,11 +48,12 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
     FILES
     TracerMotorState.msg
-    UartTracerMotorState.msg
     TracerLightState.msg
     TracerLightCmd.msg
     TracerStatus.msg
-    UartTracerStatus.msg
+    BatteryState.msg
+    ClearErr.msg
+    ResetOdom.msg
 )
 
 

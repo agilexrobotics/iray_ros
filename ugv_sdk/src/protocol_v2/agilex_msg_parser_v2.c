@@ -142,6 +142,12 @@ bool DecodeCanFrameV2(const struct can_frame *rx_frame, AgxMessage *msg) {
       msg->body.rc_state_msg.var_a = frame->var_a;
       break;
     }
+    case CAN_MSG_CHARGE_ID: {
+      msg->type = AgxMsgCharge;
+      ChargeFrame *frame = (ChargeFrame *)(rx_frame->data);
+      msg->body.charge_state_msg.charge_flag = frame->charge_flag;
+      break;
+    }
     case CAN_MSG_ACTUATOR1_HS_STATE_ID:
     case CAN_MSG_ACTUATOR2_HS_STATE_ID:
     case CAN_MSG_ACTUATOR3_HS_STATE_ID:

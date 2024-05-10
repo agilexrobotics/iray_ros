@@ -72,8 +72,35 @@ class TracerBaseV2 : public AgilexBase<ProtocolV2Parser>,
     return tracer_actuator;
   }
 
+  TracerCommonSensorState GetCommonSensorState() override {
+    auto common_sensor =
+        AgilexBase<ProtocolV2Parser>::GetCommonSensorStateMsgGroup();
+
+    TracerCommonSensorState tracer_bms;
+
+    tracer_bms.time_stamp = common_sensor.time_stamp;
+
+    tracer_bms.bms_basic_state.current = common_sensor.bms_basic_state.current;
+    // Note: BMS CAN message definition is not consistent across AgileX robots.
+    // Robots with steering mechanism should additionally divide the voltage by
+    // 10.
+    tracer_bms.bms_basic_state.voltage =
+        common_sensor.bms_basic_state.voltage * 0.1f;
+    tracer_bms.bms_basic_state.battery_soc =
+        common_sensor.bms_basic_state.battery_soc;
+    tracer_bms.bms_basic_state.battery_soh =
+        common_sensor.bms_basic_state.battery_soh;
+    tracer_bms.bms_basic_state.temperature =
+        common_sensor.bms_basic_state.temperature;
+    
+    tracer_bms.charge_state.charge_flag = 
+        common_sensor.charge_state.charge_flag;
+
+    return tracer_bms;
+  }
+
   void ResetRobotState() override {
-    // TODO
+    AgilexBase<ProtocolV2Parser>::ResetRobotState();
   }
 };
 }  // namespace westonrobot

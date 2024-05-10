@@ -101,6 +101,10 @@ typedef struct {
 } RcStateMessage;
 
 typedef struct {
+  uint8_t charge_flag;
+} ChargeStateMessage;
+
+typedef struct {
   uint8_t motor_id;
   int16_t rpm;
   float current;
@@ -289,6 +293,7 @@ typedef enum {
   AgxMsgLightState,
   AgxMsgMotionModeState,
   AgxMsgRcState,
+  AgxMsgCharge,
   // actuator feedback
   AgxMsgActuatorHSState,
   AgxMsgActuatorLSState,
@@ -333,6 +338,7 @@ typedef struct {
     LightStateMessage light_state_msg;
     MotionModeStateMessage motion_mode_state_msg;
     RcStateMessage rc_state_msg;
+    ChargeStateMessage charge_state_msg;
     // actuator feedback
     ActuatorHSStateMessage actuator_hs_state_msg;
     ActuatorLSStateMessage actuator_ls_state_msg;

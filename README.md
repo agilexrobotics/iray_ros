@@ -1,28 +1,14 @@
 # ROS Packages for Iray Tracer Mobile Base
 
-## Packages
+## ROS包结构
 
 * tracer_base: a ROS wrapper around tracer SDK to monitor and control the robot
 * tracer_bringup: launch and configuration files to start ROS nodes
 * tracer_msgs: tracer related message definitions
 
-## Communication interface setup
+## 使用方法
 
-#### Note on CAN interface on Nvidia Jetson Platforms
-
-Nvidia Jeston TX2/Xavier/XavierNX have CAN controller(s) integrated in the main SOC. If you're using a dev kit, you need to add a CAN transceiver for proper CAN communication. 
-
-## Basic usage of the ROS package
-
-1. Install dependent packages
-
-   ```
-   $ sudo apt install ros-$ROS_DISTRO-teleop-twist-keyboard
-   $ sudo apt install ros-$ROS_DISTRO-joint-state-publisher-gui
-   $ sudo apt install ros-$ROS_DISTRO-ros-controllers
-   ```
-
-2. Clone the packages into your catkin workspace and compile
+1. Clone the packages into your catkin workspace and compile
 
    (the following instructions assume your catkin workspace is at: ~/catkin_ws/src)
 
@@ -32,8 +18,8 @@ Nvidia Jeston TX2/Xavier/XavierNX have CAN controller(s) integrated in the main 
    $ cd ..
    $ catkin_make
    ```
-   
-3. Setup CAN-To-USB adapter
+
+2. Setup CAN-To-USB adapter
 
 * Enable gs_usb kernel module(If you have already added this module, you do not need to add it)
 
@@ -64,7 +50,56 @@ Nvidia Jeston TX2/Xavier/XavierNX have CAN controller(s) integrated in the main 
 * Start the keyboard tele-op node
 
   ```
-  $ roslaunch tracer_bringup tracer_teleop_keyboard.launch
+  $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+  ```
+
+## ROS话题反馈和功能
+
+### 电池信息反馈/battery_state
+
+```bash
+std_msgs/Header header //时间戳
+  uint32 seq
+  time stamp
+  string frame_id
+uint32 seq
+time stamp
+string frame_id
+float32 voltage //电池电压
+float32 temperature //电池温度
+float32 current //电池电流
+float32 percentage //电量百分比
+bool is_charge // 当前是否为充电状态
+```
+
+### 重置里程计话题/reset_odom
+
+``` bash
+rostopic pub /reset_odom tracer_msgs/ResetOdom "clear: {}"
+```
+
+发送该话题消息，里程计累计历程清零
+
+### 清除所有错误码话题/clear_err
+
+``` bash
+rostopic pub /clear_err tracer_msgs/ClearErr "clear: {}"
+```
+
+发送该话题消息，清除车辆所有错误码和异常状态
+
+
+
+## CAN test
+
+this part is used for agilex's developers to test the CAN protocol
+
+- enable the virtual can net
+
+  ``` bash
+  sudo modprobe vcan
+  sudo ip link add dev vcan0 type vcan
+  sudo ip link set up vcan0
   ```
 
 **SAFETY PRECAUSION**: 
