@@ -307,7 +307,18 @@ void TracerROSMessenger::PublishOdometryToROS(double linear, double angular, dou
     odom_msg.twist.twist.linear.x = linear_speed_;
     odom_msg.twist.twist.linear.y = 0.0;
     odom_msg.twist.twist.angular.z = angular_speed_;
-
+    odom_msg.twist.covariance = { 1e-9, 0, 0, 0, 0, 0,
+                                  0, 1e6, 0, 0, 0, 0,
+                                  0, 0, 1e6, 0, 0, 0,
+                                  0, 0, 0, 1e6, 0, 0,
+                                  0, 0, 0, 0, 1e6, 0,
+                                  0, 0, 0, 0, 0, 0.1 };
+    odom_msg.pose.covariance = { 1e-9, 0, 0, 0, 0, 0,
+                                    0, 1e-9, 0, 0, 0, 0,
+                                    0, 0, 1e6, 0, 0, 0,
+                                    0, 0, 0, 1e6, 0, 0,
+                                    0, 0, 0, 0, 1e6, 0,
+                                    0, 0, 0, 0, 0, 1e6 };
     odom_publisher_.publish(odom_msg);
 }
 } // namespace wescore
