@@ -402,10 +402,12 @@ class AgilexBase : public RobotCommonInterface {
       case AgxMsgBmsExtended: {
         common_sensor_state_msgs_.bms_extend_state = 
           status_msg.body.bms_extended_msg;
+        break;
       }
       case AgxMsgCharge: {
         common_sensor_state_msgs_.charge_state =
           status_msg.body.charge_state_msg;
+        break;
       }
       default:
         break;
