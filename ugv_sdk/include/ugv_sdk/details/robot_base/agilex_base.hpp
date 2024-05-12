@@ -49,6 +49,7 @@ struct CommonSensorStateMsgGroup {
   BmsBasicMessage bms_basic_state;
   BmsExtendedMessage bms_extend_state;
   ChargeStateMessage charge_state;
+  OdometryMessage odom_msg;
 };
 
 template <typename ParserType>
@@ -407,6 +408,11 @@ class AgilexBase : public RobotCommonInterface {
       case AgxMsgCharge: {
         common_sensor_state_msgs_.charge_state =
           status_msg.body.charge_state_msg;
+        break;
+      }
+      case AgxMsgOdometry: {
+        common_sensor_state_msgs_.odom_msg = 
+          status_msg.body.odometry_msg;
         break;
       }
       default:

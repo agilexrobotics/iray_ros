@@ -31,6 +31,7 @@ int main(int argc, char **argv)
     private_node.param<int>("update_rate", messenger.update_rate_, 50);
     private_node.param<std::string>("odom_topic_name", messenger.odom_topic_name_,std::string("odom"));
     private_node.param<bool>("publish_odom_tf", messenger.publish_odom_tf_, false);
+    private_node.param<bool>("use_encoder", messenger.use_encoder_, true);
 
     // connect to robot and setup ROS subscription
     if (port_name.find("can") != std::string::npos)

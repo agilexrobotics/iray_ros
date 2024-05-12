@@ -186,8 +186,9 @@ void TracerROSMessenger::PublishStateToROS()
     status_msg.front_light_state.custom_value = robot_state.light_state.front_light.custom_value;
     status_publisher_.publish(status_msg);
 
-    // publish BMS state
+    // common sensor
     {
+        // publish BMS state
         auto common_sensor_state = tracer_->GetCommonSensorState();
 
         tracer_msgs::BatteryState batt_msg;
@@ -204,18 +205,12 @@ void TracerROSMessenger::PublishStateToROS()
         else if(common_sensor_state.charge_state.charge_flag == 0)
             batt_msg.is_charge=false;
         batt_msg.percentage = common_sensor_state.bms_basic_state.battery_soc;
-        // batt_msg.charge = std::numeric_limits<float>::quiet_NaN();
-        // batt_msg.capacity = std::numeric_limits<float>::quiet_NaN();
-        // batt_msg.design_capacity = std::numeric_limits<float>::quiet_NaN();
-        // batt_msg.power_supply_status =
-        //     tracer_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
-        // batt_msg.power_supply_health =
-        //     tracer_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
-        // batt_msg.power_supply_technology =
-        //     tracer_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LION;
-        // batt_msg.present = std::numeric_limits<uint8_t>::quiet_NaN();
 
         battery_state_pub_.publish(batt_msg);
+
+    //update odomentry msg
+        left_wheel_odom = common_sensor_state.odom_msg.left_wheel;
+        right_wheel_odom = common_sensor_state.odom_msg.right_wheel;
     }
 
     // publish odometry and tf
@@ -267,10 +262,57 @@ void TracerROSMessenger::PublishOdometryToROS(double linear, double angular, dou
     linear_speed_ = linear;
     angular_speed_ = angular;
 
-    double d_x = linear_speed_ * std::cos(theta_) * dt;
-    double d_y = linear_speed_ * std::sin(theta_) * dt;
-    double d_theta = angular_speed_ * dt;
+    //init can timeout flag
+    static int can_timeout_cnt = 0;
 
+    //judge if timeout
+    if((linear_speed_ == last_linear_speed || angular_speed_ == last_angular_speed))
+    {
+        if(can_timeout_cnt < 10)
+            can_timeout_cnt++;
+    }
+    else if(can_timeout_cnt > 0)
+    {
+        can_timeout_cnt = 0;
+    }
+    //timeout
+    if(can_timeout_cnt >= 10)
+    {
+        linear = 0;
+        angular = 0;
+    }
+
+    last_linear_speed = linear_speed_;
+    last_angular_speed = angular_speed_;
+
+    double d_x,d_y,d_theta;
+    // choose encoder or linear angular
+    if(use_encoder_ == false)
+    {
+        d_x = linear * std::cos(theta_) * dt;
+        d_y = linear * std::sin(theta_) * dt;
+        d_theta = angular * dt;
+    }
+    else if(use_encoder_ == true)
+    {
+        // 本帧里程计数值减去上一帧里程计数值，得单位时间(20ms)轮子移动距离
+        float d_left_wheel = left_wheel_odom - last_left_wheel_odom;
+        float d_right_wheel = right_wheel_odom - last_right_wheel_odom;
+
+        // 左右轮单位时间移动距离之和初以2，得车体前进距离，之差初以轮距得车体转动弧度
+        double d_move = (d_left_wheel + d_right_wheel) * 0.5;
+        double d_rotation = (d_right_wheel - d_left_wheel)/472; //轮距 472mm;
+
+        d_x = d_move * std::cos(theta_);
+        d_y = d_move * std::sin(theta_);
+        d_theta = d_rotation;
+
+        //mm to m
+        d_x *= 0.001;
+        d_y *= 0.001 ;
+    }
+
+    //将单位时间里程累计，得到当前位置姿态信息
     position_x_ += d_x;
     position_y_ += d_y;
     theta_ += d_theta;
@@ -304,9 +346,9 @@ void TracerROSMessenger::PublishOdometryToROS(double linear, double angular, dou
     odom_msg.pose.pose.position.z = 0.0;
     odom_msg.pose.pose.orientation = odom_quat;
 
-    odom_msg.twist.twist.linear.x = linear_speed_;
+    odom_msg.twist.twist.linear.x = linear;
     odom_msg.twist.twist.linear.y = 0.0;
-    odom_msg.twist.twist.angular.z = angular_speed_;
+    odom_msg.twist.twist.angular.z = angular;
     odom_msg.twist.covariance = { 1e-9, 0, 0, 0, 0, 0,
                                   0, 1e6, 0, 0, 0, 0,
                                   0, 0, 1e6, 0, 0, 0,

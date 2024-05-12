@@ -96,6 +96,11 @@ class TracerBaseV2 : public AgilexBase<ProtocolV2Parser>,
     tracer_bms.charge_state.charge_flag = 
         common_sensor.charge_state.charge_flag;
 
+    tracer_bms.odom_msg.left_wheel = 
+        common_sensor.odom_msg.left_wheel;
+    tracer_bms.odom_msg.right_wheel = 
+        common_sensor.odom_msg.right_wheel;
+    
     return tracer_bms;
   }
 

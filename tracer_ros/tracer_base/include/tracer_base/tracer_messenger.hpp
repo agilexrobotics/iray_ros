@@ -36,6 +36,7 @@ public:
     std::string odom_topic_name_;
     int update_rate_;
     bool publish_odom_tf_;
+    bool use_encoder_;
 
     bool simulated_robot_ = false;
     int sim_control_rate_ = 50;
@@ -69,9 +70,17 @@ private:
     // speed variables
     double linear_speed_ = 0.0;
     double angular_speed_ = 0.0;
+    double last_linear_speed = 0.0;
+    double last_angular_speed = 0.0;
     double position_x_ = 0.0;
     double position_y_ = 0.0;
     double theta_ = 0.0;
+
+    //wheel encoder odomentry, mm
+    float last_left_wheel_odom = 0;
+    float last_right_wheel_odom = 0;
+    float left_wheel_odom;
+    float right_wheel_odom;
     
     ros::Time last_time_;
     ros::Time current_time_;

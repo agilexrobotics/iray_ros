@@ -37,6 +37,7 @@ struct TracerCommonSensorState {
 
   BmsBasicMessage bms_basic_state;
   ChargeStateMessage charge_state;
+  OdometryMessage odom_msg;
 };
 struct TracerInterface {
   virtual ~TracerInterface() = default;

@@ -16,6 +16,7 @@
     <arg name="update_rate" default="50" />
     <arg name="odom_topic_name" default="odom" />
     <arg name="publish_odom_tf" default="false" />
+    <arg name="use_encoder" default="false" />
 
     <node name="tracer_base_node" pkg="tracer_base" type="tracer_base_node" output="screen">
         <param name="port_name" type="string" value="$(arg port_name)" />
@@ -26,6 +27,7 @@
         <param name="update_rate" type="int" value="$(arg update_rate)" />
         <param name="odom_topic_name" type="string" value="$(arg odom_topic_name)" />  
         <param name="publish_odom_tf" type="bool" value="$(arg publish_odom_tf)" />
+        <param name="use_encoder" type="bool" value="$(arg use_encoder)"/>
 
     </node>
 </launch>
