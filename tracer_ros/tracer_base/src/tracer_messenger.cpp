@@ -266,7 +266,7 @@ void TracerROSMessenger::PublishOdometryToROS(double linear, double angular, dou
     static int can_timeout_cnt = 0;
 
     //judge if timeout
-    if((linear_speed_ == last_linear_speed || angular_speed_ == last_angular_speed))
+    if(linear_speed_ == last_linear_speed)
     {
         if(can_timeout_cnt < 10)
             can_timeout_cnt++;
