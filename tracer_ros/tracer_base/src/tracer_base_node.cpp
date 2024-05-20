@@ -36,21 +36,16 @@ int main(int argc, char **argv)
     // connect to robot and setup ROS subscription
     if (port_name.find("can") != std::string::npos)
     {
-        try
-        {
-            robot->Connect(port_name);
-        }
-        catch (std::exception error)
-        {
-            ROS_ERROR("please bringup up can or make sure can port exist");
+        if (!robot->Connect(port_name)) {
+            ROS_ERROR("Failed to connect to the CAN port,please bringup up can or make sure can port exist");
             ros::shutdown();
         }
         robot->EnableCommandedMode();
         ROS_INFO("Using CAN bus to talk with the robot");
     }
-    else
-    {
-        ROS_INFO("Using UART to talk with the robot");
+    else{
+        ROS_ERROR("Invalid port name: %s", port_name.c_str());
+        ros::shutdown();
     }
     messenger.SetupSubscription();
 
