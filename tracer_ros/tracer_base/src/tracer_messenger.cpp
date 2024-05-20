@@ -286,31 +286,10 @@ void TracerROSMessenger::PublishOdometryToROS(double linear, double angular, dou
     last_angular_speed = angular_speed_;
 
     double d_x,d_y,d_theta;
-    // choose encoder or linear angular
-    if(use_encoder_ == false)
-    {
-        d_x = linear * std::cos(theta_) * dt;
-        d_y = linear * std::sin(theta_) * dt;
-        d_theta = angular * dt;
-    }
-    else if(use_encoder_ == true)
-    {
-        // 本帧里程计数值减去上一帧里程计数值，得单位时间(20ms)轮子移动距离
-        float d_left_wheel = left_wheel_odom - last_left_wheel_odom;
-        float d_right_wheel = right_wheel_odom - last_right_wheel_odom;
-
-        // 左右轮单位时间移动距离之和初以2，得车体前进距离，之差初以轮距得车体转动弧度
-        double d_move = (d_left_wheel + d_right_wheel) * 0.5;
-        double d_rotation = (d_right_wheel - d_left_wheel)/472; //轮距 472mm;
-
-        d_x = d_move * std::cos(theta_);
-        d_y = d_move * std::sin(theta_);
-        d_theta = d_rotation;
-
-        //mm to m
-        d_x *= 0.001;
-        d_y *= 0.001 ;
-    }
+    
+    d_x = linear * std::cos(theta_) * dt;
+    d_y = linear * std::sin(theta_) * dt;
+    d_theta = angular * dt;
 
     //将单位时间里程累计，得到当前位置姿态信息
     position_x_ += d_x;
