@@ -32,8 +32,10 @@ typedef struct {
 
 typedef struct {
   bool enable_cmd_ctrl;
-  AgxLightOperation front_light;
-  AgxLightOperation rear_light;
+  uint8_t mode;
+  uint8_t R_value;
+  uint8_t G_value;
+  uint8_t B_value;
 } LightCommandMessage;
 
 typedef struct {

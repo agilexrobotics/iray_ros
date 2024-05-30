@@ -75,72 +75,15 @@ void TracerROSMessenger::GetCurrentMotionCmdForSim(double &linear, double &angul
 
 void TracerROSMessenger::LightCmdCallback(const tracer_msgs::TracerLightCmd::ConstPtr &msg)
 {
-    if (!simulated_robot_)
-    {
-        if (msg->enable_cmd_light_control)
-        {
-            LightCommandMessage cmd;
+    LightCommandMessage cmd;
 
-            switch (msg->front_mode)
-            {
-            case tracer_msgs::TracerLightCmd::LIGHT_CONST_OFF:
-            {
-                cmd.front_light.mode = CONST_OFF;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_CONST_ON:
-            {
-                cmd.front_light.mode = CONST_ON;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_BREATH:
-            {
-                cmd.front_light.mode = BREATH;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_CUSTOM:
-            {
-                cmd.front_light.mode = CUSTOM;
-                cmd.front_light.custom_value = msg->front_custom_value;
-                break;
-            }
-            }
+    cmd.enable_cmd_ctrl = msg->enable_cmd_light_control;
+    cmd.mode = msg->mode;
+    cmd.R_value = msg->R_value;
+    cmd.G_value = msg->G_value;
+    cmd.B_value = msg->B_value;
 
-            switch (msg->rear_mode)
-            {
-            case tracer_msgs::TracerLightCmd::LIGHT_CONST_OFF:
-            {
-                cmd.rear_light.mode = CONST_OFF;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_CONST_ON:
-            {
-                cmd.rear_light.mode = CONST_ON;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_BREATH:
-            {
-                cmd.rear_light.mode = BREATH;
-                break;
-            }
-            case tracer_msgs::TracerLightCmd::LIGHT_CUSTOM:
-            {
-                cmd.rear_light.mode = CUSTOM;
-                cmd.rear_light.custom_value = msg->rear_custom_value;
-                break;
-            }
-            }
-
-            tracer_->SetLightCommand(cmd.front_light.mode,cmd.front_light.custom_value);
-        }
-        else
-        {
-        }
-    }
-    else
-    {
-        std::cout << "simulated robot received light control cmd" << std::endl;
-    }
+    tracer_->SetLightCommand(cmd.enable_cmd_ctrl,cmd.mode,cmd.R_value,cmd.G_value,cmd.B_value);
 }
 
 void TracerROSMessenger::PublishStateToROS()
@@ -181,9 +124,9 @@ void TracerROSMessenger::PublishStateToROS()
         //status_msg.motor_states[i].temperature = state.motor_states[i].temperature;
     }
 
-    status_msg.light_control_enabled = robot_state.light_state.enable_cmd_ctrl;
-    status_msg.front_light_state.mode = robot_state.light_state.front_light.mode;
-    status_msg.front_light_state.custom_value = robot_state.light_state.front_light.custom_value;
+    // status_msg.light_control_enabled = robot_state.light_state.enable_cmd_ctrl;
+    // status_msg.front_light_state.mode = robot_state.light_state.front_light.mode;
+    // status_msg.front_light_state.custom_value = robot_state.light_state.front_light.custom_value;
     status_publisher_.publish(status_msg);
 
     // common sensor
@@ -245,7 +188,7 @@ void TracerROSMessenger::PublishSimStateToROS(double linear, double angular)
     //     status_msg.motor_states[i].temperature = state.motor_states[i].temperature;
     // }
 
-    status_msg.light_control_enabled = false;
+    // status_msg.light_control_enabled = false;
     // status_msg.front_light_state.mode = state.front_light_state.mode;
     // status_msg.front_light_state.custom_value = state.front_light_state.custom_value;
     // status_msg.rear_light_state.mode = state.rear_light_state.mode;

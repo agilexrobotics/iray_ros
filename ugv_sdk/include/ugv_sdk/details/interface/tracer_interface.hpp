@@ -43,7 +43,9 @@ struct TracerInterface {
   virtual ~TracerInterface() = default;
 
   virtual void SetMotionCommand(double linear_vel, double angular_vel) = 0;
-  virtual void SetLightCommand(AgxLightMode f_mode, uint8_t f_value) = 0;
+  // virtual void SetLightCommand(AgxLightMode f_mode, uint8_t f_value) = 0;
+  virtual void SetLightCommand(uint8_t enable, uint8_t mode, uint8_t R_value, uint8_t G_value, uint8_t B_value) = 0;
+
   virtual void DisableLightControl() = 0;
 
   // get robot state

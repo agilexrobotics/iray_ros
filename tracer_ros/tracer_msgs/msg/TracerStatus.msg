@@ -22,8 +22,8 @@ float64 battery_voltage
 TracerMotorState[2] motor_states
 
 # light state
-bool light_control_enabled
-TracerLightState front_light_state
+# bool light_control_enabled
+# TracerLightState front_light_state
 
 #odometer state
 float64 left_odomter

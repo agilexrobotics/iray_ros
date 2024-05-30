@@ -126,21 +126,38 @@ class AgilexBase : public RobotCommonInterface {
   }
 
   // one-shot light command
-  void SendLightCommand(AgxLightMode front_mode, uint8_t front_custom_value,
-                        AgxLightMode rear_mode, uint8_t rear_custom_value) {
+  void SendLightCommand(uint8_t enable, uint8_t mode,
+                        uint8_t R_value, uint8_t G_value, uint8_t B_value) {
     if (can_ != nullptr && can_->IsOpened()) {
       AgxMessage msg;
       msg.type = AgxMsgLightCommand;
-      msg.body.light_command_msg.enable_cmd_ctrl = true;
-      msg.body.light_command_msg.front_light.mode = front_mode;
-      msg.body.light_command_msg.front_light.custom_value = front_custom_value;
-      msg.body.light_command_msg.rear_light.mode = rear_mode;
-      msg.body.light_command_msg.rear_light.custom_value = rear_custom_value;
+      msg.body.light_command_msg.enable_cmd_ctrl = enable;
+      msg.body.light_command_msg.mode = mode;
+      msg.body.light_command_msg.R_value = R_value;
+      msg.body.light_command_msg.G_value = G_value;
+      msg.body.light_command_msg.B_value = B_value;
 
       // send to can bus
       can_frame frame;
       if (parser_.EncodeMessage(&msg, &frame)) can_->SendFrame(frame);
     }
+  }
+
+  void SendLightCommand(AgxLightMode front_mode, uint8_t front_custom_value,
+                        AgxLightMode rear_mode, uint8_t rear_custom_value) {
+    // if (can_ != nullptr && can_->IsOpened()) {
+    //   AgxMessage msg;
+    //   msg.type = AgxMsgLightCommand;
+    //   msg.body.light_command_msg.enable_cmd_ctrl = true;
+    //   msg.body.light_command_msg.front_light.mode = front_mode;
+    //   msg.body.light_command_msg.front_light.custom_value = front_custom_value;
+    //   msg.body.light_command_msg.rear_light.mode = rear_mode;
+    //   msg.body.light_command_msg.rear_light.custom_value = rear_custom_value;
+
+    //   // send to can bus
+    //   can_frame frame;
+    //   if (parser_.EncodeMessage(&msg, &frame)) can_->SendFrame(frame);
+    // }
   }
 
   void DisableLightControl() {

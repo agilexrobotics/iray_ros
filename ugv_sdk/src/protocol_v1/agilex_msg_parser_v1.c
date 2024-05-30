@@ -52,15 +52,15 @@ bool DecodeCanFrameV1(const struct can_frame *rx_frame, AgxMessage *msg) {
       break;
     }
     case CAN_MSG_LIGHT_STATE_ID: {
-      msg->type = AgxMsgLightState;
-      LightStateFrame *frame = (LightStateFrame *)(rx_frame->data);
-      msg->body.light_command_msg.enable_cmd_ctrl =
-          (frame->enable_cmd_ctrl != 0) ? true : false;
-      msg->body.light_command_msg.front_light.mode = frame->front_mode;
-      msg->body.light_command_msg.front_light.custom_value =
-          frame->front_custom;
-      msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
-      msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
+      // msg->type = AgxMsgLightState;
+      // LightStateFrame *frame = (LightStateFrame *)(rx_frame->data);
+      // msg->body.light_command_msg.enable_cmd_ctrl =
+      //     (frame->enable_cmd_ctrl != 0) ? true : false;
+      // msg->body.light_command_msg.front_light.mode = frame->front_mode;
+      // msg->body.light_command_msg.front_light.custom_value =
+      //     frame->front_custom;
+      // msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
+      // msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
       break;
     }
     case CAN_MSG_VALUE_SET_STATE_ID: {
@@ -137,29 +137,29 @@ bool EncodeCanFrameV1(const AgxMessage *msg, struct can_frame *tx_frame) {
       break;
     }
     case AgxMsgLightCommand: {
-      static uint8_t count = 0;
-      tx_frame->can_id = CAN_MSG_LIGHT_COMMAND_ID;
-      tx_frame->can_dlc = 8;
-      LightCommandFrame frame;
-      if (msg->body.light_command_msg.enable_cmd_ctrl) {
-        frame.enable_cmd_ctrl = LIGHT_ENABLE_CMD_CTRL;
-        frame.front_mode = msg->body.light_command_msg.front_light.mode;
-        frame.front_custom =
-            msg->body.light_command_msg.front_light.custom_value;
-        frame.rear_mode = msg->body.light_command_msg.rear_light.mode;
-        frame.rear_custom = msg->body.light_command_msg.rear_light.custom_value;
-      } else {
-        frame.enable_cmd_ctrl = LIGHT_DISABLE_CMD_CTRL;
-        frame.front_mode = 0;
-        frame.front_custom = 0;
-        frame.rear_mode = 0;
-        frame.rear_custom = 0;
-      }
-      frame.reserved0 = 0;
-      frame.count = count++;
-      memcpy(tx_frame->data, (uint8_t *)(&frame), tx_frame->can_dlc);
-      tx_frame->data[7] = CalcCanFrameChecksumV1(
-          tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
+      // static uint8_t count = 0;
+      // tx_frame->can_id = CAN_MSG_LIGHT_COMMAND_ID;
+      // tx_frame->can_dlc = 8;
+      // LightCommandFrame frame;
+      // if (msg->body.light_command_msg.enable_cmd_ctrl) {
+      //   frame.enable_cmd_ctrl = LIGHT_ENABLE_CMD_CTRL;
+      //   frame.front_mode = msg->body.light_command_msg.front_light.mode;
+      //   frame.front_custom =
+      //       msg->body.light_command_msg.front_light.custom_value;
+      //   frame.rear_mode = msg->body.light_command_msg.rear_light.mode;
+      //   frame.rear_custom = msg->body.light_command_msg.rear_light.custom_value;
+      // } else {
+      //   frame.enable_cmd_ctrl = LIGHT_DISABLE_CMD_CTRL;
+      //   frame.front_mode = 0;
+      //   frame.front_custom = 0;
+      //   frame.rear_mode = 0;
+      //   frame.rear_custom = 0;
+      // }
+      // frame.reserved0 = 0;
+      // frame.count = count++;
+      // memcpy(tx_frame->data, (uint8_t *)(&frame), tx_frame->can_dlc);
+      // tx_frame->data[7] = CalcCanFrameChecksumV1(
+      //     tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
       break;
     }
     default: {

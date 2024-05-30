@@ -43,16 +43,16 @@ bool DecodeCanFrameV2(const struct can_frame *rx_frame, AgxMessage *msg) {
       break;
     }
     case CAN_MSG_LIGHT_COMMAND_ID: {
-      msg->type = AgxMsgLightCommand;
-      // parse frame buffer to message
-      LightCommandFrame *frame = (LightCommandFrame *)(rx_frame->data);
-      msg->body.light_command_msg.enable_cmd_ctrl =
-          (frame->enable_cmd_ctrl != 0) ? true : false;
-      msg->body.light_command_msg.front_light.mode = frame->front_mode;
-      msg->body.light_command_msg.front_light.custom_value =
-          frame->front_custom;
-      msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
-      msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
+      // msg->type = AgxMsgLightCommand;
+      // // parse frame buffer to message
+      // LightCommandFrame *frame = (LightCommandFrame *)(rx_frame->data);
+      // msg->body.light_command_msg.enable_cmd_ctrl =
+      //     (frame->enable_cmd_ctrl != 0) ? true : false;
+      // msg->body.light_command_msg.front_light.mode = frame->front_mode;
+      // msg->body.light_command_msg.front_light.custom_value =
+      //     frame->front_custom;
+      // msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
+      // msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
       break;
     }
     case CAN_MSG_BRAKING_COMMAND_ID: {
@@ -97,15 +97,15 @@ bool DecodeCanFrameV2(const struct can_frame *rx_frame, AgxMessage *msg) {
       break;
     }
     case CAN_MSG_LIGHT_STATE_ID: {
-      msg->type = AgxMsgLightState;
-      LightStateFrame *frame = (LightStateFrame *)(rx_frame->data);
-      msg->body.light_command_msg.enable_cmd_ctrl =
-          (frame->enable_cmd_ctrl != 0) ? true : false;
-      msg->body.light_command_msg.front_light.mode = frame->front_mode;
-      msg->body.light_command_msg.front_light.custom_value =
-          frame->front_custom;
-      msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
-      msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
+      // msg->type = AgxMsgLightState;
+      // LightStateFrame *frame = (LightStateFrame *)(rx_frame->data);
+      // msg->body.light_command_msg.enable_cmd_ctrl =
+      //     (frame->enable_cmd_ctrl != 0) ? true : false;
+      // msg->body.light_command_msg.front_light.mode = frame->front_mode;
+      // msg->body.light_command_msg.front_light.custom_value =
+      //     frame->front_custom;
+      // msg->body.light_command_msg.rear_light.mode = frame->rear_mode;
+      // msg->body.light_command_msg.rear_light.custom_value = frame->rear_custom;
       break;
     }
     case CAN_MSG_RC_STATE_ID: {
@@ -416,21 +416,20 @@ bool EncodeCanFrameV2(const AgxMessage *msg, struct can_frame *tx_frame) {
       LightCommandFrame frame;
       if (msg->body.light_command_msg.enable_cmd_ctrl) {
         frame.enable_cmd_ctrl = LIGHT_ENABLE_CMD_CTRL;
-        frame.front_mode = msg->body.light_command_msg.front_light.mode;
-        frame.front_custom =
-            msg->body.light_command_msg.front_light.custom_value;
-        frame.rear_mode = msg->body.light_command_msg.rear_light.mode;
-        frame.rear_custom = msg->body.light_command_msg.rear_light.custom_value;
+        frame.mode = msg->body.light_command_msg.mode;
+        frame.R_value = msg->body.light_command_msg.R_value;
+        frame.G_value = msg->body.light_command_msg.G_value;
+        frame.B_value = msg->body.light_command_msg.B_value;
       } else {
         frame.enable_cmd_ctrl = LIGHT_DISABLE_CMD_CTRL;
-        frame.front_mode = 0;
-        frame.front_custom = 0;
-        frame.rear_mode = 0;
-        frame.rear_custom = 0;
+        frame.mode = 0;
+        frame.R_value = 0;
+        frame.G_value = 0;
+        frame.B_value = 0;
       }
       frame.reserved0 = 0;
       frame.reserved1 = 0;
-      frame.count = count++;
+      frame.reserved2 = 0;
       memcpy(tx_frame->data, (uint8_t *)(&frame), tx_frame->can_dlc);
       break;
     }

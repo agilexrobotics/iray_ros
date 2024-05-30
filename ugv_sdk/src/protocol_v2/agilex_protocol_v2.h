@@ -153,13 +153,13 @@ typedef struct {
 
 typedef struct {
   uint8_t enable_cmd_ctrl;
-  uint8_t front_mode;
-  uint8_t front_custom;
-  uint8_t rear_mode;
-  uint8_t rear_custom;
+  uint8_t mode;
+  uint8_t R_value;
+  uint8_t G_value;
+  uint8_t B_value;
   uint8_t reserved0;
   uint8_t reserved1;
-  uint8_t count;
+  uint8_t reserved2;
 } LightCommandFrame;
 
 typedef struct {
