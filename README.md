@@ -71,7 +71,7 @@ float64 angular_velocity
 # 车辆状态反馈
 uint8 NORMAL = 0            #车辆正常
 uint8 EMERGENCY_STOP = 1    #急停
-uint8 SYSTEM_FAULT = 0      #系统异常
+uint8 SYSTEM_FAULT = 2      #系统异常
 uint8 base_state
 
 uint8 STANDBY = 0           #待机模式
