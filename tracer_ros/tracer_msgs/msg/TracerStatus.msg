@@ -1,24 +1,28 @@
 Header header
 
-int8 MOTOR_ID_FRONT_RIGHT = 0
-int8 MOTOR_ID_FRONT_LEFT = 1
-int8 MOTOR_ID_REAR_RIGHT = 2
-int8 MOTOR_ID_REAR_LEFT = 3
-
-int8 LIGHT_ID_FRONT = 0
-int8 LIGHT_ID_REAR = 1
-
-# motion state
+# 运动状态反馈
 float64 linear_velocity
 float64 angular_velocity
 
-# base state
+# 车辆状态反馈
+uint8 NORMAL = 0            #车辆正常
+uint8 EMERGENCY_STOP = 1    #急停
+uint8 SYSTEM_FAULT = 0      #系统异常
 uint8 base_state
+
+uint8 STANDBY = 0           #待机模式
+uint8 CAN_MODE = 1          #CAN指令控制模式
+uint8 UART_MODE = 2         #串口控制模式
+uint8 REMOTE_MOED = 3       #遥控模式
 uint8 control_mode
+
+# 错误码，详情见码表
 uint8 fault_code
+
+#电池电压
 float64 battery_voltage
 
-# motor state
+# 电机状态反馈
 TracerMotorState[2] motor_states
 
 # light state
